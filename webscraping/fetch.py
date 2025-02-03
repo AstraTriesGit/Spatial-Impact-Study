@@ -8,6 +8,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 
 
 class DataFetcher:
@@ -90,3 +91,45 @@ class DataFetcher:
             EC.element_to_be_clickable((By.CSS_SELECTOR, "button.btn.btn-success"))
         )
         submit_button.click()
+
+class CoordFetcher:
+    def __init__(self):
+        """
+        Sets all the options for the driver in this method itself. No need to duplicate things, right?
+        Sets a driver field ready for work!
+        """
+        options = Options()
+        options.add_argument("--no-sandbox")
+        options.add_argument('--disable-dev-shm-usage')
+
+        prefs = {"download.default_directory": "~/Downloads"}
+        options.add_experimental_option("prefs", prefs)
+        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+        self.driver.get("https://indiawris.gov.in/wris/#/Geoviewer")
+
+    def get_coord_table(self):
+        wait = WebDriverWait(self.driver, 25)
+
+        # ArcGIS application
+        wait.until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, "/html/body/app-root/app-geovisualization/iframe")))
+        time.sleep(5)
+        # layer list
+        wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[2]/div[2]/div[3]/div[2]/div[8]"))).click()
+        # checkbox
+        wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[2]/div[2]/div[1]/div[8]/div[2]/div/div/div/div[3]/div/table/tbody[1]/tr[79]/td[1]/div[2]/div"))).click()
+        # dropdown menu
+        # wait.until(EC.element_to_be_clickable((By.XPATH,"/html/body/div[2]/div[2]/div[1]/div[8]/div[2]/div/div/div/div[3]/div/table/tbody[1]/tr[79]/td[1]/div[1]"))).click()
+        # # kebab button
+        # wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/div[2]/div[2]/div[1]/div[8]/div[2]/div/div/div/div[3]/div/table/tbody[1]/tr[80]/td/table/tr[1]/td[3]/div/div[2]/div[4]"))).click()
+        # # view in attribute table
+        # wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[2]/div[2]/div[1]/div[8]/div[2]/div/div/div/div[3]/div/table/tbody[1]/tr[80]/td/table/tr[1]/td[3]/div/div[2]/div[5]/div[3]"))).click()
+
+        # open attribute table
+        time.sleep(3)
+        # self.driver.find_element(By.TAG_NAME, "body").click()
+
+        actions = ActionChains(self.driver)
+        actions.move_by_offset(0, 0).click().perform()
+        wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[2]/div[2]/div[3]/div[1]"))).click()
+        time.sleep(20)
+

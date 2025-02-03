@@ -5,7 +5,7 @@ But that's not today
 Today we fight!
 """
 
-from fetch import DataFetcher
+from fetch import *
 
-fetcher = DataFetcher()
-fetcher.download_one(['Bihar'])
+fetcher = CoordFetcher()
+fetcher.get_coord_table()
