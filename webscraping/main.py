@@ -8,4 +8,4 @@ Today we fight!
 from fetch import *
 
 fetcher = CoordFetcher()
-fetcher.get_coord_table()
+fetcher.take_two()

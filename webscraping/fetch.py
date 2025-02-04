@@ -10,6 +10,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 
+from dataprocessors import DataProcessor
+
 
 class DataFetcher:
     def __init__(self):
@@ -92,6 +94,10 @@ class DataFetcher:
         )
         submit_button.click()
 
+
+
+
+
 class CoordFetcher:
     def __init__(self):
         """
@@ -105,7 +111,7 @@ class CoordFetcher:
         prefs = {"download.default_directory": "~/Downloads"}
         options.add_experimental_option("prefs", prefs)
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-        self.driver.get("https://indiawris.gov.in/wris/#/Geoviewer")
+        self.driver.get("https://www.arcgis.com/home/webmap/viewer.html?url=https%3A%2F%2Farc.indiawris.gov.in%2Fserver%2Frest%2Fservices%2FNWIC%2FGroundwater_Stations%2FMapServer&source=sd")
 
     def get_coord_table(self):
         wait = WebDriverWait(self.driver, 25)
@@ -132,4 +138,36 @@ class CoordFetcher:
         actions.move_by_offset(0, 0).click().perform()
         wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[2]/div[2]/div[3]/div[1]"))).click()
         time.sleep(20)
+
+    def take_two(self):
+        wait = WebDriverWait(self.driver, 25)
+        # Groundwater Stations
+        wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div[1]/div[3]/div[3]/div/div/div[3]/div[2]/div/div[1]/div[2]/div[1]/div[1]/table/tbody/tr/td[4]/span"))).click()
+        time.sleep(2)
+        wait.until(EC.element_to_be_clickable((By.XPATH,
+                                               "/html/body/div[1]/div[1]/div[3]/div[3]/div/div/div[3]/div[2]/div/div[1]/div[2]/div[1]/div[1]/table/tbody/tr/td[4]/span"))).click()
+        # Groundwater Station
+        wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div[1]/div[3]/div[3]/div/div/div[3]/div[2]/div/div[1]/div[2]/div[1]/div[2]/div[1]/table/tbody/tr/td[3]/span"))).click()
+        # Show Table
+        wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div[1]/div[3]/div[3]/div/div/div[3]/div[2]/div/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[2]/span"))).click()
+
+        # Now that we have the table, let the magic begin...
+        table = WebDriverWait(self.driver, 25).until(
+            EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div[1]/div[3]/div[5]/div[4]/div[1]/div/div/div/div[1]/div/div/div[2]/div/div[2]/div"))
+        )
+        rows = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div[role='row']"))
+        )
+        print(rows)
+
+        processor = DataProcessor()
+        rows = table.find_elements("css selector", "div[role='row']")
+        print(rows)
+
+        for row in rows:
+            row_data = processor.extract_row_data(row)
+            print(row_data)
+            break
+
+        time.sleep(25)
 
