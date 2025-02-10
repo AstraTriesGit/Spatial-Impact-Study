@@ -7,5 +7,8 @@ Today we fight!
 
 from fetch import *
 
-fetcher = CoordFetcher()
-fetcher.take_two()
+# fetcher = CoordFetcher()
+# fetcher.take_two()
+
+fetcher = DataFetcher()
+fetcher.download_one()

@@ -12,6 +12,11 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 from dataprocessors import DataProcessor
 
+def standby():
+    print("Standby!")
+    while True:
+        pass
+
 
 class DataFetcher:
     def __init__(self):
@@ -28,7 +33,7 @@ class DataFetcher:
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
         self.driver.get("https://indiawris.gov.in/wris/#/groundWater")
 
-    def download_one(self, states:list[str]):
+    def download_one(self):
         # wait for the entire ArcGIS application to load
         WebDriverWait(self.driver, 25).until(
             EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, "iframe[src*='Groundwaterlevelnew']"))
@@ -45,38 +50,47 @@ class DataFetcher:
         )
         select_report_type = Select(report_type)
         select_report_type.select_by_value("Statewise")
-        time.sleep(10)
 
         # a much more involved state selection process
         state_dropdown = WebDriverWait(self.driver, 25).until(
             EC.element_to_be_clickable((By.CLASS_NAME, "dropdown-btn"))
         )
         state_dropdown.click()
-        dropdown_list = WebDriverWait(self.driver, 25).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "dropdown-list"))
-        )
-        dropdown_list.click()
+
+        # WebDriverWait(self.driver, 10)
+         # .until(EC.element_to_be_clickable((By.XPATH,
+         # "/html/body/app-root/app-groundwaterlevelnew/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]/select")))
+
+        # select state
+        WebDriverWait(self.driver, 25).until(
+            EC.element_to_be_clickable((By.XPATH, "/html/body/app-root/app-groundwaterlevelnew/div[2]/div/div/div[2]/div/div/div[2]/div/div[2]/div/ng-multiselect-dropdown/div/div[2]/ul[2]/li[37]"))
+        ).click()
+        state_dropdown.click()
+
+        # need to add another wait because the Source refuses to set to CGWB sometimes
         time.sleep(10)
-        for state in states:
-            checkbox = WebDriverWait(self.driver, 25).until(
-                EC.element_to_be_clickable((By.XPATH, f"//div[text()='{state}']/preceding-sibling::input[@type='checkbox']"))
-            )
-            checkbox.click()
-        label = self.driver.find_element(By.CLASS_NAME, "col-form-label")
-        label.click()
 
         start_date = WebDriverWait(self.driver, 25).until(
             EC.presence_of_element_located((By.ID, "startDateDiv"))
         )
-        start_date.send_keys("2024-04-01")
+        start_date.send_keys("2019-06-01")
         end_date = WebDriverWait(self.driver, 25).until(
             EC.presence_of_element_located((By.ID, "endDateDiv"))
         )
-        end_date.send_keys("2024-04-30")
+        end_date.send_keys("2019-06-30")
+
+        standby()
+
+
         final_download_button = WebDriverWait(self.driver, 25).until(
             EC.element_to_be_clickable((By.ID, "dataDownloadforReport"))
         )
         final_download_button.click()
+        while True:
+            final_download_button.click()
+            print('chaljaaaaaaaaaa')
+
+
         student_checkbox = WebDriverWait(self.driver, 25).until(
             EC.presence_of_element_located((By.ID, "Student"))
         )
